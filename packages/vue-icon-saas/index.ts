@@ -67,6 +67,7 @@ import IconBatchFill from './src/batch-fill'
 import IconBefilter from './src/befilter'
 import IconBoat from './src/boat'
 import IconButtonBar from './src/button-bar'
+import IconButton from './src/button'
 import IconCalculator from './src/calculator'
 import IconCalendar from './src/calendar'
 import IconCalendarView from './src/calendar-view'
@@ -129,6 +130,7 @@ import IconDescending from './src/descending'
 import IconDetailedList from './src/detailed-list'
 import IconDetailsPage from './src/details-page'
 import IconDetailsTemplatePage from './src/details-template-page'
+import IconDialogBox from './src/dialog-box'
 import IconDialog from './src/dialog'
 import IconDialogSelect from './src/dialog-select'
 import IconDigitalassistant from './src/digitalassistant'
@@ -357,6 +359,7 @@ import IconProjectProperty from './src/project-property'
 import IconProjectStructureTree from './src/project-structure-tree'
 import IconProjectTemplate from './src/project-template'
 import IconPromotion from './src/promotion'
+import IconPromptBox from './src/prompt-box'
 import IconPublicHome from './src/public-home'
 import IconPublicNotice from './src/public-notice'
 import IconPublish from './src/publish'
@@ -870,6 +873,7 @@ export { IconBatchFill, IconBatchFill as iconBatchFill }
 export { IconBefilter, IconBefilter as iconBefilter }
 export { IconBoat, IconBoat as iconBoat }
 export { IconButtonBar, IconButtonBar as iconButtonBar }
+export { IconButton, IconButton as iconButton }
 export { IconCalculator, IconCalculator as iconCalculator }
 export { IconCalendar, IconCalendar as iconCalendar }
 export { IconCalendarView, IconCalendarView as iconCalendarView }
@@ -935,6 +939,7 @@ export { IconDescending, IconDescending as iconDescending }
 export { IconDetailedList, IconDetailedList as iconDetailedList }
 export { IconDetailsPage, IconDetailsPage as iconDetailsPage }
 export { IconDetailsTemplatePage, IconDetailsTemplatePage as iconDetailsTemplatePage }
+export { IconDialogBox, IconDialogBox as iconDialogBox }
 export { IconDialog, IconDialog as iconDialog }
 export { IconDialogSelect, IconDialogSelect as iconDialogSelect }
 export { IconDigitalassistant, IconDigitalassistant as iconDigitalassistant }
@@ -1172,6 +1177,7 @@ export { IconProjectProperty, IconProjectProperty as iconProjectProperty }
 export { IconProjectStructureTree, IconProjectStructureTree as iconProjectStructureTree }
 export { IconProjectTemplate, IconProjectTemplate as iconProjectTemplate }
 export { IconPromotion, IconPromotion as iconPromotion }
+export { IconPromptBox, IconPromptBox as iconPromptBox }
 export { IconPublicHome, IconPublicHome as iconPublicHome }
 export { IconPublicNotice, IconPublicNotice as iconPublicNotice }
 export { IconPublish, IconPublish as iconPublish }
@@ -1706,6 +1712,7 @@ export default {
   IconBefilter,
   IconBoat,
   IconButtonBar,
+  IconButton,
   IconCalculator,
   IconCalendar,
   IconCalendarView,
@@ -1768,6 +1775,7 @@ export default {
   IconDetailedList,
   IconDetailsPage,
   IconDetailsTemplatePage,
+  IconDialogBox,
   IconDialog,
   IconDialogSelect,
   IconDigitalassistant,
@@ -1996,6 +2004,7 @@ export default {
   IconProjectStructureTree,
   IconProjectTemplate,
   IconPromotion,
+  IconPromptBox,
   IconPublicHome,
   IconPublicNotice,
   IconPublish,
