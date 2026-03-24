@@ -6,6 +6,21 @@ export default {
       type: 'component',
       props: [
         {
+          name: 'append-to-body',
+          type: 'boolean',
+          defaultValue: 'false',
+          desc: {
+            'zh-CN': 'drawer 本身是否插入到 body 上',
+            'en-US': 'Whether the drawer itself is inserted into the body'
+          },
+          mode: ['pc', 'mobile-first'],
+          pcDemo: '',
+          mfDemo: '',
+          meta: {
+            stable: '3.30.0'
+          }
+        },
+        {
           name: 'before-close',
           type: '(type) => boolean',
           defaultValue: '',
