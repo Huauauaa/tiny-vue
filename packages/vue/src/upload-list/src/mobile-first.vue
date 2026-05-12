@@ -290,7 +290,9 @@
               :style="{ background: imageBgColor }"
               class="relative w-full h-full after:absolute after:w-full after:h-full after:left-0 after:top-0 after:rounded after:bg-color-bg-7"
               :class="[
-                !~['uploading', 'fail'].indexOf(file.status) ? 'after:hidden sm:after:group-hover/upload-list:block' : '',
+                !~['uploading', 'fail'].indexOf(file.status)
+                  ? 'after:hidden sm:after:group-hover/upload-list:block'
+                  : '',
                 { 'mb-7': listType === 'picture-card' && showName },
                 ~['video', 'audio'].indexOf(file.type) ? 'after:opacity-0' : 'after:opacity-50'
               ]"
@@ -373,7 +375,9 @@
                   </span>
                 </div>
                 <div v-else>
-                  <div :class="['hidden', { 'sm:group-hover/upload-list:block': !~['video', 'audio'].indexOf(file.type) }]">
+                  <div
+                    :class="['hidden', { 'sm:group-hover/upload-list:block': !~['video', 'audio'].indexOf(file.type) }]"
+                  >
                     <slot name="operate" :file="file">
                       <icon-eyeopen
                         v-if="handlePreview"
