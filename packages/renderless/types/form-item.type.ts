@@ -6,6 +6,7 @@ import type { IFormInstance } from './form.type'
 import type {
   watchError,
   updateTip,
+  updateTooltip,
   watchValidateStatus,
   computedLabelStyle,
   computedValueStyle,
@@ -22,6 +23,8 @@ import type {
   removeValidateEvents,
   unmounted,
   mounted,
+  registerField,
+  unregisterField,
   computedIsRequired,
   resetField,
   getFilteredRule,
@@ -95,6 +98,7 @@ export interface IFormItemState {
   isErrorBlock: boolean
   tooltipType: string
   isMultiple: boolean
+  fieldRegistered: boolean
   // 无障碍支持：唯一 ID 用于 ARIA 属性关联
   errorId: string
   labelId: string
@@ -121,6 +125,7 @@ export interface IFormItemApi {
   broadcast: ISharedRenderlessParamUtils['broadcast']
   watchError: ReturnType<typeof watchError>
   updateTip: ReturnType<typeof updateTip>
+  updateTooltip: ReturnType<typeof updateTooltip>
   watchValidateStatus: ReturnType<typeof watchValidateStatus>
   computedLabelStyle: ReturnType<typeof computedLabelStyle>
   computedValueStyle: ReturnType<typeof computedValueStyle>
@@ -137,6 +142,8 @@ export interface IFormItemApi {
   removeValidateEvents: ReturnType<typeof removeValidateEvents>
   unmounted: ReturnType<typeof unmounted>
   mounted: ReturnType<typeof mounted>
+  registerField: ReturnType<typeof registerField>
+  unregisterField: ReturnType<typeof unregisterField>
   computedIsRequired: ReturnType<typeof computedIsRequired>
   resetField: ReturnType<typeof resetField>
   getFilteredRule: ReturnType<typeof getFilteredRule>

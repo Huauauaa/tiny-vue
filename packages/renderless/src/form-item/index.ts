@@ -246,37 +246,86 @@ export const computedFieldValue =
     return getPropByPath(model, path, true).v
   }
 
-export const mounted =
+export const watchRequired =
+  ({ api }: Pick<IFormItemRenderlessParams, 'api'>) =>
+  (newValue: boolean, oldValue: boolean): void => {
+    // required 从无到有，或从有到无，需要重新注册验证事件
+    if (newValue !== oldValue) {
+      api.removeValidateEvents()
+      api.addValidateEvents()
+    }
+  }
+
+export const watchRules =
+  ({ api }: Pick<IFormItemRenderlessParams, 'api'>) =>
+  (newValue: IFormItemRule[], oldValue: IFormItemRule[]): void => {
+    // rules 从无到有，或从有到无，需要重新注册验证事件
+    const hadRules = oldValue?.length > 0
+    const hasRules = newValue?.length > 0
+
+    if (hadRules !== hasRules) {
+      api.removeValidateEvents()
+      api.addValidateEvents()
+    }
+  }
+
+export const registerField =
   ({ api, vm, props, state }: Pick<IFormItemRenderlessParams, 'api' | 'vm' | 'props' | 'state'>) =>
   (): void => {
-    // 初始化tooltip信息
+    if (!props.prop || state.fieldRegistered) {
+      return
+    }
+
+    api.dispatch('Form', 'form:addField', vm)
+
+    let initialValue = state.fieldValue
+
+    if (Array.isArray(initialValue)) {
+      initialValue = initialValue.slice()
+    }
+
+    state.initialValue = initialValue
+    api.addValidateEvents()
+    state.fieldRegistered = true
+  }
+
+export const unregisterField =
+  ({ api, vm, state }: Pick<IFormItemRenderlessParams, 'api' | 'vm' | 'state'>) =>
+  (): void => {
+    if (!state.fieldRegistered) {
+      return
+    }
+
+    api.dispatch('Form', 'form:removeField', vm)
+    api.removeValidateEvents()
+    state.fieldRegistered = false
+  }
+
+export const updateTooltip =
+  ({ vm, state }: Pick<IFormItemRenderlessParams, 'vm' | 'state'>) =>
+  (): void => {
     const tooltip = vm.$refs.tooltip
     if (tooltip) {
       const content = vm.$refs.content
       tooltip.state.referenceElm = state.isMultiple ? content : content?.children[0]
       state.tooltip = tooltip
     }
+  }
 
-    if (props.prop) {
-      api.dispatch('Form', 'form:addField', vm)
+export const mounted =
+  ({ api }: Pick<IFormItemRenderlessParams, 'api'>) =>
+  (): void => {
+    // 初始化tooltip信息
+    api.updateTooltip()
 
-      let initialValue = state.fieldValue
-
-      if (Array.isArray(initialValue)) {
-        initialValue = ([] as any).concat(initialValue)
-      }
-
-      state.initialValue = initialValue
-      api.addValidateEvents()
-    }
+    api.registerField()
   }
 
 export const unmounted =
-  ({ api, vm, state }: Pick<IFormItemRenderlessParams, 'api' | 'vm' | 'state'>) =>
+  ({ api, state }: Pick<IFormItemRenderlessParams, 'api' | 'state'>) =>
   (): void => {
     state.canShowTip = false
-    api.dispatch('Form', 'form:removeField', vm)
-    api.removeValidateEvents()
+    api.unregisterField()
   }
 
 export const validate =
@@ -312,6 +361,7 @@ export const validate =
       api.clearValidate()
 
       const handlerError = () => {
+        api.updateTooltip()
         state.validateState = !errors ? VALIDATE_STATE.Success : VALIDATE_STATE.Error
 
         if (errors && props.error) {
@@ -466,7 +516,6 @@ export const updateTip =
     if (state.getValidateType !== 'tip' && !state.canShowTip) {
       return
     }
-
     const tooltip = vm.$refs.tooltip
 
     if (!tooltip) {

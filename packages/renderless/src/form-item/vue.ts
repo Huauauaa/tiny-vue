@@ -23,8 +23,12 @@ import {
   removeValidateEvents,
   mounted,
   unmounted,
+  registerField,
+  unregisterField,
   watchError,
   watchValidateStatus,
+  watchRequired,
+  watchRules,
   computedLabelStyle,
   computedValueStyle,
   computedContentStyle,
@@ -36,6 +40,7 @@ import {
   computedIsErrorInline,
   computedIsErrorBlock,
   updateTip,
+  updateTooltip,
   wrapValidate,
   getDisplayedValue,
   clearDisplayedValue,
@@ -138,7 +143,8 @@ const initState = ({
     disabled: computed(() => state.formInstance?.disabled || props.disabled),
     tooltipType: computed(() => state.formInstance?.state.tooltipType ?? 'normal'),
     // 标记表单项下是否有多个子节点
-    isMultiple: false
+    isMultiple: false,
+    fieldRegistered: false
   })
 
   return state
@@ -153,8 +159,11 @@ const initApi = ({ api, state, dispatch, broadcast, props, constants, vm, t, nex
     dispatch,
     broadcast,
     watchError: watchError(state),
-    updateTip: updateTip({ vm, state }),
+    updateTip: updateTip({ api, vm, state }),
+    updateTooltip: updateTooltip({ vm, state }),
     watchValidateStatus: watchValidateStatus(state),
+    watchRequired: watchRequired({ api }),
+    watchRules: watchRules({ api }),
     computedLabelStyle: computedLabelStyle({ props, state }),
     computedValueStyle: computedValueStyle({ props, state }),
     computedContentStyle: computedContentStyle({ props, state }),
@@ -168,8 +177,10 @@ const initApi = ({ api, state, dispatch, broadcast, props, constants, vm, t, nex
     getRules: getRules({ props, state }),
     updateComputedLabelWidth: updateComputedLabelWidth(state),
     removeValidateEvents: removeValidateEvents(vm),
-    unmounted: unmounted({ api, vm, state }),
-    mounted: mounted({ api, vm, props, state }),
+    registerField: registerField({ api, vm, props, state }),
+    unregisterField: unregisterField({ api, vm, state }),
+    unmounted: unmounted({ api, state }),
+    mounted: mounted({ api }),
     computedIsRequired: computedIsRequired({ api, state }),
     resetField: resetField({ api, nextTick, props, state }),
     getFilteredRule: getFilteredRule(api),
@@ -186,12 +197,30 @@ const initApi = ({ api, state, dispatch, broadcast, props, constants, vm, t, nex
   })
 }
 
-const initWatch = ({ watch, api, props, state }) => {
+const initWatch = ({ watch, api, props, state, nextTick }) => {
   watch(() => props.error, api.watchError, { immediate: true })
 
   watch(() => props.validateStatus, api.watchValidateStatus)
 
   watch(() => state.formInstance?.displayOnly, api.clearDisplayedValue)
+
+  watch(
+    () => props.prop,
+    (newProp, oldProp) => {
+      if (oldProp) {
+        api.unregisterField()
+        api.clearValidate()
+      }
+
+      if (newProp) {
+        nextTick(() => api.registerField())
+      }
+    }
+  )
+
+  watch(() => props.required, api.watchRequired)
+
+  watch(() => props.rules, api.watchRules, { deep: true })
 }
 
 export const renderless = (
@@ -205,7 +234,7 @@ export const renderless = (
   provide('formItem', vm)
 
   initApi({ api, state, dispatch, broadcast, props, constants, vm, t, nextTick, slots })
-  initWatch({ watch, api, props, state })
+  initWatch({ watch, api, props, state, nextTick })
 
   onMounted(api.mounted)
   vm.$on('displayed-value-changed', (param) => {
