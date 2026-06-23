@@ -46,7 +46,7 @@ export const closed =
   }
 
 export const watchVisible =
-  ({ props, parent, api }: Pick<IDrawerRenderlessParams, 'props' | 'parent' | 'api'>) =>
+  ({ props, parent, api }: Pick<IDrawerRenderlessParams, 'state' | 'props' | 'parent' | 'api' | 'nextTick'>) =>
   (value: boolean) => {
     // tiny优化抽屉显隐逻辑
     value ? api.open() : api.close()
