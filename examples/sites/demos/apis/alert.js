@@ -119,7 +119,7 @@ export default {
             'zh-CN': '是否显示标题，在 size 为 large 时有效',
             'en-US': 'Whether to show title Only valid when size is large'
           },
-          mode: ['pc', 'mobile-first'],
+          mode: ['pc'],
           pcDemo: 'title',
           meta: {
             stable: '3.21.0'
@@ -138,7 +138,8 @@ export default {
         },
         {
           name: 'size',
-          type: "'normal' | 'large'",
+          typeAnchorName: 'ISize',
+          type: 'ISize',
           defaultValue: "'normal'",
           desc: {
             'zh-CN': '警告的尺寸大小',
@@ -146,7 +147,7 @@ export default {
           },
           mode: ['pc', 'mobile-first'],
           pcDemo: 'size',
-          mfDemo: ''
+          mfDemo: 'size'
         },
         {
           name: 'title',
@@ -279,6 +280,13 @@ export default {
       type: 'type',
       code: `
 type IType = 'success' | 'warning' | 'info' | 'error' | 'simple'
+`
+    },
+    {
+      name: 'ISize',
+      type: 'type',
+      code: `
+type ISize = 'small' | 'medium' | 'normal' | 'large'
 `
     }
   ]
