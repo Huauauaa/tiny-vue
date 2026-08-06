@@ -26,7 +26,7 @@
       v-for="item in columns"
       :key="item.property"
       :disabled="item.disabled"
-      :label="item.title"
+      :label="getFuncText(item.own.title)"
       :value="item.property"
     >
     </tiny-option>
@@ -63,35 +63,57 @@ export default {
   },
   data() {
     return {
-      columns: [],
       multivalue: []
     }
   },
-  created() {
-    this.columns = this.getColumnConfigs(this.data)
+  computed: {
+    columns() {
+      return this.getColumnConfigs(this.data)
+    }
   },
   watch: {
     data: {
+      immediate: true,
       handler(val) {
-        this.columns = this.getColumnConfigs(val)
-        this.multivalue = this.columns.filter((item) => item.visible).map((item) => item.property)
+        const columns = this.getColumnConfigs(val)
+        this.multivalue = columns.filter((item) => item.visible).map((item) => item.property)
       }
     }
   },
   methods: {
+    getFuncText(text) {
+      return typeof text === 'function' ? text() : text
+    },
     columnChange(values) {
       this.columns.forEach((column) => {
         column.visible = values.includes(column.property)
       })
 
-      this.$emit('saveSettings', { columns: this.columns })
+      const mapEmitCol = (col) => {
+        const emitCol = { ...col }
+        emitCol.title = this.getFuncText(col.own?.title)
+        delete emitCol.own
+
+        if (Array.isArray(emitCol.children)) {
+          emitCol.children = emitCol.children.map(mapEmitCol)
+        }
+
+        return emitCol
+      }
+
+      const emitColumns = this.columns.map(mapEmitCol)
+      this.$emit('saveSettings', { columns: emitColumns })
     },
     getColumnConfigs(configs) {
       const getColNodes = (columns) =>
         columns
-          .map(({ id, own, property, fixed, visible, order, sortable, level, children }) => {
+          .map((col) => {
+            const { property, children, own } = col
             if (property) {
-              const column = { id, title: own.title, property, fixed, visible, order, sortable, level, children }
+              const column = { ...col }
+
+              // 模板渲染时需要通过 item.own.title 实时读取来支持国际化切换响应
+              column.own = own
 
               column.disabled = Boolean(this.setting?.customDisable?.(column))
 
@@ -103,12 +125,13 @@ export default {
           })
           .filter((i) => i)
 
-      if (configs.length && this.$grid) {
+      if (configs && configs.length && this.$grid) {
         const { collectColumn } = this.$grid.getTableColumn()
         const columns = getColNodes(collectColumn)
 
         return columns
       }
+      return []
     }
   }
 }
