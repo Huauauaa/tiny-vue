@@ -77,7 +77,7 @@ export const useCellSpan = (bodyVm, bodyProps) => {
         stateNormalCell(normalState, normalTable, params, $table)
       }
 
-      splitRowspanAtExpand(normalTable, tableData, $table)
+      splitRowspanAtExpand(normalTable, $table)
 
       if (leftList.length > 0) {
         adjustColspan(normalTable, leftList.length - 1, true)
@@ -220,12 +220,14 @@ const rowSpanMethod = (rowSpan, { row, $rowIndex, column, data }) => {
   }
 }
 
-export const splitRowspanAtExpand = (normalTable, tableData, $table) => {
+export const splitRowspanAtExpand = (normalTable, $table) => {
   const expandeds = $table.expandeds
   if (!expandeds?.length || !normalTable.length) return
 
   const expandedSet = new Set(expandeds)
   const colCount = normalTable[0].length
+  const hasSpanMethod = typeof $table.spanMethod === 'function'
+  const rowAt = (r) => normalTable[r][0].params.row
 
   for (let c = 0; c < colCount; c++) {
     let coverUntil = -1
@@ -240,12 +242,14 @@ export const splitRowspanAtExpand = (normalTable, tableData, $table) => {
 
       let intended = attrs._dataRowspan
       if (!(intended > 0)) {
-        intended = remainingEqualSpan(tableData, r, params.column, $table)
+        if (hasSpanMethod) continue
+        intended = remainingEqualSpan(normalTable, r, params.column, $table)
+        if (!(intended > 0)) continue
       }
 
       let span = 1
       while (span < intended && r + span < normalTable.length) {
-        if (expandedSet.has(tableData[r + span - 1])) break
+        if (expandedSet.has(rowAt(r + span - 1))) break
         span++
       }
 
@@ -257,18 +261,18 @@ export const splitRowspanAtExpand = (normalTable, tableData, $table) => {
   }
 }
 
-const remainingEqualSpan = (tableData, start, column, $table) => {
+const remainingEqualSpan = (normalTable, start, column, $table) => {
   const { rowSpan, spanMethod } = $table
   if (spanMethod || !rowSpan?.length || !column?.property) return 1
 
   const fields = rowSpan.map((item) => item.field)
   if (!fields.includes(column.property)) return 1
 
-  const cellVal = tableData[start]?.[column.property]
+  const cellVal = normalTable[start][0].params.row?.[column.property]
   if (!cellVal) return 1
 
   let count = 1
-  while (start + count < tableData.length && tableData[start + count][column.property] === cellVal) {
+  while (start + count < normalTable.length && normalTable[start + count][0].params.row[column.property] === cellVal) {
     count++
   }
   return count

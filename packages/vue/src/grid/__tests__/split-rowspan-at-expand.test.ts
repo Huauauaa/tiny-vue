@@ -3,21 +3,17 @@ import { splitRowspanAtExpand } from '../src/composable/useCellSpan'
 
 const col = (property) => ({ property, id: property })
 
-const cell = (rowspan, column, extra = {}) => ({
+const cell = (rowspan, column, row, extra = {}) => ({
   attrs: { rowspan, colspan: rowspan > 0 ? 1 : 0, visible: rowspan > 0, _dataRowspan: rowspan, ...extra },
-  params: { column }
+  params: { column, row }
 })
 
 describe('splitRowspanAtExpand', () => {
   test('no-op without expandeds', () => {
     const area = col('area')
-    const rows = [
-      [cell(3, area)],
-      [cell(0, area)],
-      [cell(0, area)]
-    ]
     const data = [{ area: 'A' }, { area: 'A' }, { area: 'A' }]
-    splitRowspanAtExpand(rows, data, { expandeds: [], rowSpan: [{ field: 'area' }] })
+    const rows = [[cell(3, area, data[0])], [cell(0, area, data[1])], [cell(0, area, data[2])]]
+    splitRowspanAtExpand(rows, { expandeds: [], rowSpan: [{ field: 'area' }] })
     expect(rows.map((r) => r[0].attrs.rowspan)).toEqual([3, 0, 0])
   })
 
@@ -25,8 +21,8 @@ describe('splitRowspanAtExpand', () => {
     const city = col('city')
     const r0 = { city: '深圳' }
     const r1 = { city: '中山' }
-    const rows = [[cell(1, city)], [cell(1, city)]]
-    splitRowspanAtExpand(rows, [r0, r1], { expandeds: [r0], rowSpan: [] })
+    const rows = [[cell(1, city, r0)], [cell(1, city, r1)]]
+    splitRowspanAtExpand(rows, { expandeds: [r0], rowSpan: [] })
     expect(rows.map((r) => r[0].attrs.rowspan)).toEqual([1, 1])
     expect(rows[0][0].attrs.colspan).toBe(1)
   })
@@ -36,10 +32,9 @@ describe('splitRowspanAtExpand', () => {
     const r0 = { area: '华南区' }
     const r1 = { area: '华南区' }
     const r2 = { area: '华南区' }
-    const rows = [[cell(3, area)], [cell(0, area)], [cell(0, area)]]
-    const data = [r0, r1, r2]
+    const rows = [[cell(3, area, r0)], [cell(0, area, r1)], [cell(0, area, r2)]]
 
-    splitRowspanAtExpand(rows, data, {
+    splitRowspanAtExpand(rows, {
       expandeds: [r1],
       rowSpan: [{ field: 'area' }]
     })
@@ -54,9 +49,9 @@ describe('splitRowspanAtExpand', () => {
     const r0 = { area: 'A' }
     const r1 = { area: 'A' }
     const r2 = { area: 'A' }
-    const rows = [[cell(3, area)], [cell(0, area)], [cell(0, area)]]
+    const rows = [[cell(3, area, r0)], [cell(0, area, r1)], [cell(0, area, r2)]]
 
-    splitRowspanAtExpand(rows, [r0, r1, r2], {
+    splitRowspanAtExpand(rows, {
       expandeds: [r0],
       rowSpan: [{ field: 'area' }]
     })
@@ -71,13 +66,35 @@ describe('splitRowspanAtExpand', () => {
     const r0 = { area: 'A' }
     const r1 = { area: 'A' }
     const r2 = { area: 'A' }
-    const rows = [[cell(3, area)], [cell(0, area)], [cell(0, area)]]
+    const rows = [[cell(3, area, r0)], [cell(0, area, r1)], [cell(0, area, r2)]]
 
-    splitRowspanAtExpand(rows, [r0, r1, r2], {
+    splitRowspanAtExpand(rows, {
       expandeds: [r2],
       rowSpan: [{ field: 'area' }]
     })
 
     expect(rows.map((r) => r[0].attrs.rowspan)).toEqual([3, 0, 0])
+  })
+
+  test('spanMethod covered cells stay hidden after expand', () => {
+    const a = col('a')
+    const b = col('b')
+    const r0 = { a: 1, b: 2 }
+    const r1 = { a: 1, b: 2 }
+    const covered = (column, row) => cell(0, column, row, { colspan: 0, visible: false, _dataRowspan: 0 })
+    const rows = [
+      [cell(2, a, r0, { colspan: 2, _dataRowspan: 2 }), covered(b, r0)],
+      [covered(a, r1), covered(b, r1)]
+    ]
+
+    splitRowspanAtExpand(rows, {
+      expandeds: [r0],
+      spanMethod: () => ({})
+    })
+
+    expect(rows[0][0].attrs).toMatchObject({ rowspan: 1, colspan: 2, visible: true })
+    expect(rows[0][1].attrs).toMatchObject({ rowspan: 0, colspan: 0, visible: false })
+    expect(rows[1][0].attrs).toMatchObject({ rowspan: 0, colspan: 0, visible: false })
+    expect(rows[1][1].attrs).toMatchObject({ rowspan: 0, colspan: 0, visible: false })
   })
 })
