@@ -295,7 +295,7 @@ export const handleDateChange =
         )
 
         if (state.maxDate < state.minDate) {
-          state.minDate = state.maxDate
+          state.maxDate = state.minDate
         }
       }
     }
@@ -360,10 +360,10 @@ export const handleTimeChange =
         )
 
         if (state.maxDate < state.minDate) {
-          state.minDate = state.maxDate
+          state.maxDate = state.minDate
         }
 
-        vm.$refs.maxTimePicker.state.value = state.minDate
+        vm.$refs.maxTimePicker.state.value = state.maxDate
         state.maxTimePickerVisible = false
       }
     }
@@ -483,7 +483,7 @@ export const handleMaxTimePick =
     }
 
     if (state.maxDate && state.minDate && state.minDate.getTime() > state.maxDate.getTime()) {
-      state.minDate = new Date(state.maxDate)
+      state.maxDate = new Date(state.minDate)
     }
   }
 

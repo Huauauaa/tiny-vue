@@ -98,3 +98,28 @@ test('测试日期范围选择', async ({ page }) => {
   await expect(startYear).toHaveValue('2020')
   await expect(endYear).toHaveValue('2023')
 })
+
+test('同一天结束时间早于开始时间时不改写开始时间 #4185', async ({ page }) => {
+  page.on('pageerror', (exception) => expect(exception).toBeNull())
+  await page.goto('date-picker#date-range')
+
+  const panelTrigger = page.getByPlaceholder('开始日期').nth(1)
+  await panelTrigger.click()
+
+  const panel = page.locator('.tiny-date-range-picker.has-time')
+  await expect(panel).toBeVisible()
+
+  const day = panel.locator('td.available.today').first()
+  await day.click()
+  await day.click()
+
+  const startTime = panel.getByPlaceholder('开始时间')
+  const endTime = panel.getByPlaceholder('结束时间')
+  await startTime.fill('10:00:00')
+  await startTime.press('Enter')
+  await endTime.fill('05:00:00')
+  await endTime.press('Enter')
+
+  await expect(startTime).toHaveValue('10:00:00')
+  await expect(endTime).toHaveValue('10:00:00')
+})
